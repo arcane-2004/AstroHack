@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import axios from "axios"
 
-import { Shell,BirthWheel,Field,ProgressSteps, } from "../AuthShell";
+import { Shell, BirthWheel, Field, ProgressSteps, } from "../AuthShell";
 export default function LoginPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -20,9 +21,29 @@ export default function LoginPage() {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     if (!validate()) return;
+
+    try {
+      const data = {
+        email: form.email,
+        password: form.password,
+      };
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/login`,
+        data,
+        {
+          withCredentials: true,
+        }
+      );
+
+      console.log(response.data);
+
+    } catch (error) {
+      console.error(error.response?.data || error.message);
+    }
     // real auth call goes here
     navigate("/success", { state: { mode: "login" } });
   };
