@@ -71,7 +71,8 @@ dailyPredictionSchema.index(
     { unique: true }
 );
 
-module.exports = mongoose.model(
-    "DailyPrediction",
-    dailyPredictionSchema
-);
+const DailyPrediction =
+    mongoose.models.DailyPrediction ||
+    mongoose.model("DailyPrediction", dailyPredictionSchema);
+
+module.exports = DailyPrediction;

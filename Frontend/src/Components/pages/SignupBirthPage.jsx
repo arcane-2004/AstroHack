@@ -1,40 +1,72 @@
-import React, { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Calendar, Clock, MapPin, ArrowRight } from "lucide-react";
 import { Shell, Field, BirthWheel, ProgressSteps } from "../AuthShell";
+import axios from "axios";
 import { useSignup } from "../context/SignupContext";
 
 export default function SignupBirthPage() {
   const navigate = useNavigate();
-  const { form, updateField, accountComplete } = useSignup();
+  const {
+    signupData,
+    setSignupData
+  } = useSignup();
   const [errors, setErrors] = useState({});
 
   // Guard: if someone lands on /signup/birth-details directly
   // (refresh, bookmarked link, typed URL) without finishing step 1,
   // send them back instead of showing a half-broken form.
-  if (!accountComplete) {
-    return <Navigate to="/signup" replace />;
-  }
+
 
   const validate = () => {
     const e = {};
-    if (!form.dob) e.dob = "Enter your date of birth.";
-    if (!form.tob) e.tob = "Enter your time of birth.";
-    if (!form.pob.trim()) e.pob = "Enter your place of birth.";
+    if (!signupData.dateOfBirth) e.dateOfBirth = "Enter your date of birth.";
+    if (!signupData.timeOfBirth) e.timeOfBirth = "Enter your time of birth.";
+    // if (!signupData.placeOfBirth.trim()) e.placeOfBirth = "Enter your place of birth.";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    // real signup API call goes here, using the full `form` object
-    navigate("/success", { state: { mode: "signup", form } });
+
+    try {
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/register`,
+        signupData,
+        {
+          withCredentials: true,
+        }
+      );
+
+      console.log("Signup response:", response);
+      if (response.status !== 201) {
+
+        throw new Error("Failed to register user.");
+
+      }
+      console.log(response.data);
+      navigate("/success", {
+        state: {
+          mode: "signup",
+          signupData
+        }
+      });
+      
+    } catch (error) {
+
+      console.error(
+        error.response?.data || error.message
+      );
+      navigate("/signup")
+    }
   };
 
   return (
     <Shell>
-      <BirthWheel time={form.tob} filled={!!form.pob} />
+      <BirthWheel time={signupData.timeOfBirth} filled={!!signupData.birthPlace} />
       <h1 className="headline">Chart your beginning.</h1>
       <p className="subcopy">Now the coordinates that make your chart yours alone.</p>
 
@@ -51,19 +83,52 @@ export default function SignupBirthPage() {
           <span className="divider-hint">for your natal chart</span>
         </div>
 
-        <Field label="Date of birth" error={errors.dob}>
+        <Field label="Date of birth" error={errors.dateOfBirth}>
           <Calendar size={16} className="field-icon" />
-          <input type="date" value={form.dob} onChange={(e) => updateField("dob", e.target.value)} className="input input-mono" />
+          <input type="date" value={signupData.dateOfBirth} onChange={(e) => setSignupData({
+            ...signupData,
+            dateOfBirth: e.target.value
+          })} className="input input-mono" />
         </Field>
 
-        <Field label="Time of birth" error={errors.tob} hint="Check your birth certificate — even 15 minutes shifts your rising sign.">
+        <Field label="Time of birth" error={errors.timeOfBirth} hint="Check your birth certificate — even 15 minutes shifts your rising sign.">
           <Clock size={16} className="field-icon" />
-          <input type="time" value={form.tob} onChange={(e) => updateField("tob", e.target.value)} className="input input-mono" />
+          <input type="time" value={signupData.timeOfBirth} onChange={(e) => setSignupData({
+            ...signupData,
+            timeOfBirth: e.target.value
+          })} className="input input-mono" />
         </Field>
 
-        <Field label="Place of birth" error={errors.pob}>
+        <Field label="Place of birth" error={errors.birthPlace}>
           <MapPin size={16} className="field-icon" />
-          <input type="text" placeholder="City, Country" value={form.pob} onChange={(e) => updateField("pob", e.target.value)} className="input" />
+          <input type="text" placeholder="Name" value={signupData.birthPlace.name} onChange={(e) => setSignupData({
+            ...signupData,
+            birthPlace: {
+              ...signupData.birthPlace,
+              name: e.target.value
+            }
+          })} className="input" />
+          <input type="text" placeholder="City" value={signupData.birthPlace.city} onChange={(e) => setSignupData({
+            ...signupData,
+            birthPlace: {
+              ...signupData.birthPlace,
+              city: e.target.value
+            }
+          })} className="input" />
+          <input type="text" placeholder="State" value={signupData.birthPlace.state} onChange={(e) => setSignupData({
+            ...signupData,
+            birthPlace: {
+              ...signupData.birthPlace,
+              state: e.target.value
+            }
+          })} className="input" />
+          <input type="text" placeholder="Country" value={signupData.birthPlace.country} onChange={(e) => setSignupData({
+            ...signupData,
+            birthPlace: {
+              ...signupData.birthPlace,
+              country: e.target.value
+            }
+          })} className="input" />
         </Field>
 
         <div className="btn-row">

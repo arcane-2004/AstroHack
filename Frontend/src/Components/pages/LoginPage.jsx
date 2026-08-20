@@ -39,6 +39,7 @@ export default function LoginPage() {
         }
       );
 
+      localStorage.setItem("token", response.data.token);
       console.log(response.data);
 
     } catch (error) {

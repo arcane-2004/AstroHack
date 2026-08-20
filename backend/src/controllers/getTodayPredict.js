@@ -24,6 +24,7 @@
 // };
 
 const AstrologyProfile = require("../models/AstroProfile");
+const dailyPridictionModel = require("../models/dailyPrediction");
 const { createAstrologyPayload } = require("../utils/createAstrologyPayload");
 const { getNavamsaService } = require("../services/navamsaService");
 const { getPlanetExtendedService } = require("../services/planetExtendedService");
@@ -31,7 +32,7 @@ const { generateDailyPrediction } = require("../services/dailyPredict");
 const { saveDailyPrediction } = require("../services/saveDailyPrediction");
 
 
-const getTodayPredict = async (req, res) => {
+const generateTodayPredict = async (req, res) => {
 
     try {
 
@@ -39,7 +40,7 @@ const getTodayPredict = async (req, res) => {
         // const { userId } = req.body;
         const userId = req.user.userId;
 
-        if(!userId){
+        if (!userId) {
             return res.status(404).json({
                 message: "Unauthorized user"
             })
@@ -54,38 +55,39 @@ const getTodayPredict = async (req, res) => {
                 message: "Astrology profile not found"
             });
         }
-
-        return res.status(200).json({
-            message: "working",
-            userId: userId,
-            profile: profile
-        })
-
-        // // Convert DB data → API payload
-        // const payload = createAstrologyPayload(profile);
-
-        // //  Call astrology services
-        // const navamasyaData = await getNavamsaService(payload);
-
-        // const planetExtendedData = await getPlanetExtendedService(payload);
-
-        // // Generate prediction
-        // const response =
-        //     await generateDailyPrediction(
-        //         navamasyaData,
-        //         planetExtendedData
-        //     );
-
-        // // Save response
-        // const savedPrediction = await saveDailyPrediction(
-        //     userId,
-        //     response
-        // );
-
-        // // Return result
+        
+        // ====== only for test ============
         // return res.status(200).json({
-        //     message:"Daily prediction generated"
-        // });
+        //     message: "working",
+        //     userId: userId,
+        //     profile: profile
+        // })
+
+        // Convert DB data → API payload
+        const payload = createAstrologyPayload(profile);
+
+        //  Call astrology services
+        const navamasyaData = await getNavamsaService(payload);
+
+        const planetExtendedData = await getPlanetExtendedService(payload);
+
+        // Generate prediction
+        const response =
+            await generateDailyPrediction(
+                navamasyaData,
+                planetExtendedData
+            );
+
+        // Save response
+        const savedPrediction = await saveDailyPrediction(
+            userId,
+            response
+        );
+
+        // Return result
+        return res.status(200).json({
+            message:"Daily prediction generated"
+        });
 
     } catch (error) {
 
@@ -97,6 +99,35 @@ const getTodayPredict = async (req, res) => {
     }
 };
 
+const getTodayPredict = async (req, res) => {
+    try {
+
+        const userId = req.user.userId;
+        
+        const dailyPrediction = await dailyPridictionModel.findOne({
+            userId: userId
+        });
+
+        if (!dailyPrediction) {
+            return res.status(404).json({
+                message: "Today's prediction not found"
+            });
+        }
+
+        return res.status(200).json({
+            prediction: dailyPrediction
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            message: "Failed to fetch today's prediction"
+        });
+    }
+};
+
 module.exports = {
+    generateTodayPredict,
     getTodayPredict
 };

@@ -1,37 +1,37 @@
-import React from "react";
-import { useLocation, useNavigate, Navigate } from "react-router-dom";
-import { Check } from "lucide-react";
+import { useNavigate} from "react-router-dom";
+import { Check, ArrowRight } from "lucide-react";
 import { Shell } from "../AuthShell";
-import { useSignup } from "../context/SignupContext";
 
 export default function SuccessPage() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { reset } = useSignup();
-  const state = location.state;
+    const navigate = useNavigate();
 
-  // Guard: no navigation state means someone hit this URL directly.
-  if (!state) return <Navigate to="/login" replace />;
+    return (
+        <Shell>
+            <div className="success-card">
 
-  const { mode, form } = state;
+                <div className="success-icon">
+                    <Check size={22} strokeWidth={2.5} />
+                </div>
 
-  const handleBack = () => {
-    reset();
-    navigate(mode === "signup" ? "/signup" : "/login");
-  };
+                <h2 className="success-title">
+                    You're all set!
+                </h2>
 
-  return (
-    <Shell>
-      <div className="success-card">
-        <div className="success-icon"><Check size={22} strokeWidth={2.5} /></div>
-        <h2 className="success-title">{mode === "signup" ? "Your chart is being cast" : "Welcome back"}</h2>
-        <p className="success-copy">
-          {mode === "signup"
-            ? `We've logged ${form?.name || "your"} birth details — ${form?.dob || "date"} at ${form?.tob || "time"}, ${form?.pob || "location"}. Your natal chart will be ready shortly.`
-            : "You're signed in."}
-        </p>
-        <button className="link-btn" onClick={handleBack}>Back to form</button>
-      </div>
-    </Shell>
-  );
+                <p className="success-copy">
+                    Your account has been successfully registered.
+                    Your astrological profile has been created and
+                    your chart is ready.
+                </p>
+
+                <button
+                    className="submit-btn "
+                    onClick={() => navigate("/today-prediction")}
+                >
+                    See Today's Prediction
+                    <ArrowRight size={16} />
+                </button>
+
+            </div>
+        </Shell>
+    );
 }

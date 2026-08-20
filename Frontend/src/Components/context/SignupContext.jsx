@@ -1,40 +1,49 @@
-import React, { createContext, useContext, useState } from "react";
-
-// Holds signup form data so it survives navigation between
-// /signup (step 1) and /signup/birth-details (step 2).
-// For a real app, swap this for whatever you already use
-// (Redux, Zustand, React Query mutation state, etc).
+import {
+    createContext,
+    useContext,
+    useState
+} from "react";
 
 const SignupContext = createContext(null);
 
-const initialForm = {
-  name: "",
-  email: "",
-  password: "",
-  dob: "",
-  tob: "",
-  pob: "",
+export const SignupProvider = ({ children }) => {
+
+    const [signupData, setSignupData] = useState({
+        name: "",
+        email: "",
+        password: "",
+
+        dateOfBirth: "",
+        timeOfBirth: "",
+
+        birthPlace: {
+            name: "",
+            city: "",
+            state: "",
+            country: ""
+        }
+    });
+
+    return (
+        <SignupContext.Provider
+            value={{
+                signupData,
+                setSignupData
+            }}
+        >
+            {children}
+        </SignupContext.Provider>
+    );
 };
 
-export function SignupProvider({ children }) {
-  const [form, setForm] = useState(initialForm);
-  const [accountComplete, setAccountComplete] = useState(false);
+export const useSignup = () => {
+    const context = useContext(SignupContext);
 
-  const updateField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
-  const reset = () => {
-    setForm(initialForm);
-    setAccountComplete(false);
-  };
+    if (!context) {
+        throw new Error(
+            "useSignup must be used inside SignupProvider"
+        );
+    }
 
-  return (
-    <SignupContext.Provider value={{ form, updateField, accountComplete, setAccountComplete, reset }}>
-      {children}
-    </SignupContext.Provider>
-  );
-}
-
-export function useSignup() {
-  const ctx = useContext(SignupContext);
-  if (!ctx) throw new Error("useSignup must be used inside <SignupProvider>");
-  return ctx;
-}
+    return context;
+};

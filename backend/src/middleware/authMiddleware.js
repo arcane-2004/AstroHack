@@ -3,21 +3,16 @@ const jwt = require("jsonwebtoken");
 const authenticate = (req, res, next) => {
     try {
 
-        const authHeader = req.headers.authorization;
+        console.log("Cookies:", req.cookies);
 
-        if (!authHeader) {
-            return res.status(401).json({
-                message: "Authentication required",
-            });
-        }
+        const token = req.cookies.token;
 
-        const token = authHeader.startsWith("Bearer ")
-            ? authHeader.split(" ")[1]
-            : null;
+        console.log("Token:", token);
+
 
         if (!token) {
             return res.status(401).json({
-                message: "Invalid authorization header",
+                message: "Authentication required",
             });
         }
 
@@ -41,3 +36,50 @@ const authenticate = (req, res, next) => {
 module.exports = {
     authenticate,
 };
+
+
+// const jwt = require("jsonwebtoken");
+
+// const authenticate = (req, res, next) => {
+//     try {
+
+//         const authHeader = req.headers.authorization;
+
+//         if (!authHeader) {
+//             return res.status(401).json({
+//                 message: "Authentication required"
+//             });
+//         }
+
+//         const token = authHeader.startsWith("Bearer ")
+//             ? authHeader.split(" ")[1]
+//             : null;
+
+//         if (!token) {
+//             return res.status(401).json({
+//                 message: "Invalid authorization header"
+//             });
+//         }
+
+//         const decoded = jwt.verify(
+//             token,
+//             process.env.JWT_SECRET
+//         );
+
+//         req.user = decoded;
+
+//         next();
+
+//     } catch (error) {
+
+//         console.error(error.message);
+
+//         return res.status(401).json({
+//             message: "Invalid or expired token"
+//         });
+//     }
+// };
+
+// module.exports = {
+//     authenticate
+// };
