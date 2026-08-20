@@ -1,5 +1,6 @@
 const { createUser } = require("../services/userService");
-const {createAstrologyProfile,} = require("../services/astroProfileService");
+const { createAstrologyProfile, } = require("../services/astroProfileService");
+const { getGeoDetails } = require("../services/geoLocationService");
 
 const createUserWithAstrologyProfile = async (req, res) => {
     try {
@@ -11,6 +12,31 @@ const createUserWithAstrologyProfile = async (req, res) => {
             timeOfBirth,
             birthPlace,
         } = req.body;
+
+        // Get longitude and latitude
+        try {
+            const location = birthPlace.city;
+
+            if (!location) {
+                return res.status(400).json({
+                    message: "Location is required"
+                });
+            }
+
+            const data = await getGeoDetails(location);
+
+            // Add geo details to birthPlace
+            birthPlace.latitude = data.latitude;
+            birthPlace.longitude = data.longitude;
+            birthPlace.timezone = data.timezone;
+
+        } catch (error) {
+            console.error(error.response?.data || error.message);
+
+            res.status(500).json({
+                message: "Failed to fetch geo details"
+            });
+        }
 
         // Create user
         const user = await createUser({
