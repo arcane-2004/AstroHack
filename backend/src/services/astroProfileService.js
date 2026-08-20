@@ -1,4 +1,4 @@
-const AstrologyProfile = require("../models/AstroProfile");
+const AstrologyProfile = require("../models/astroProfile");
 
 const createAstrologyProfile = async (profileData) => {
     const {
