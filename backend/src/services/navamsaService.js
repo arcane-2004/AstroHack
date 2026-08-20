@@ -2,19 +2,22 @@
 const axios = require('axios');
 require('dotenv').config()
 
-const getNavamsaService = async (date,year, month,hour,minute,second, latitude, longitude) => {
+const getNavamsaService = async (payload) => {
+    const {date,year, month,hours,minutes,seconds, latitude, longitude, timezone} = payload
+    
     try{
         const response = await axios.post(
             "https://json.freeastrologyapi.com/navamsa-chart-info",{
             "year": year,
             "month": month,
             "date": date,
-            "hours": hour,
-            "minutes":minute,
-            "seconds":second,
+            "hours": hours,
+            "minutes":minutes,
+            "seconds":seconds,
             "latitude": latitude,
             "longitude": longitude,
-            "timezone": 5.5,"settings": {
+            "timezone": timezone,
+            "settings": {
             "observation_point": "topocentric",
             "ayanamsha": "lahiri"
             }

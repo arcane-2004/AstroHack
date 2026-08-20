@@ -48,7 +48,7 @@ const astrologyProfileSchema = new mongoose.Schema (
             },
 
             timezone: {
-                type: String,
+                type: Number,
                 required: true,
             },
         },

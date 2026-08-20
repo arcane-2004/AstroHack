@@ -1,6 +1,8 @@
+const userModel = require("../models/user")
 const { createUser } = require("../services/userService");
 const { createAstrologyProfile, } = require("../services/astroProfileService");
 const { getGeoDetails } = require("../services/geoLocationService");
+const { generateToken } = require("../utils/jwt")
 
 const createUserWithAstrologyProfile = async (req, res) => {
     try {
@@ -28,7 +30,7 @@ const createUserWithAstrologyProfile = async (req, res) => {
             // Add geo details to birthPlace
             birthPlace.latitude = data.latitude;
             birthPlace.longitude = data.longitude;
-            birthPlace.timezone = data.timezone;
+            birthPlace.timezone = data.timezone_offset;
 
         } catch (error) {
             console.error(error.response?.data || error.message);
@@ -53,8 +55,19 @@ const createUserWithAstrologyProfile = async (req, res) => {
             birthPlace,
         });
 
+        // Generate token
+        const token = generateToken(user._id.toString());
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
         res.status(201).json({
             message: "User created successfully",
+            token,
             user,
             profile,
         });
@@ -68,6 +81,51 @@ const createUserWithAstrologyProfile = async (req, res) => {
     }
 };
 
+const loginUser = async (req, res) => {
+
+    const { email, password } = req.body;
+
+    try {
+        const user = await userModel.findOne({
+            email,
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+            });
+        }
+
+        if (user.passwordHash !== password) {
+            return res.status(401).json({
+                message: "Invalid password",
+            });
+        }
+
+        const token = generateToken(user._id.toString())
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        return res.status(201).json({
+            message: "Login Successful",
+            token,
+            user
+        })
+    }
+    catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            message: "Login failed",
+        });
+    }
+}
+
 module.exports = {
     createUserWithAstrologyProfile,
+    loginUser
 };

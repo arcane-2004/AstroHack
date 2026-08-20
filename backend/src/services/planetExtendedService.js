@@ -2,19 +2,23 @@
 const axios = require('axios');
 require('dotenv').config();
 
-const getPlanetExtendedService = async (date,year, month,hour,minute,second, latitude, longitude) => {
+const getPlanetExtendedService = async (payload) => {
+
+    const {date,year, month,hours,minutes,seconds, latitude, longitude, timezone} = payload
+    console.log("Navasma data : ",date,year, month,hours,minutes,seconds, latitude, longitude, timezone);
+    console.log(payload);
     try{
         const response = await axios.post(
             "https://json.freeastrologyapi.com/planets/extended",{
             "year": year,
             "month": month,
             "date": date,
-            "hours": hour,
-            "minutes":minute,
-            "seconds":second,
+            "hours": hours,
+            "minutes":minutes,
+            "seconds":seconds,
             "latitude": latitude,
             "longitude": longitude,
-            "timezone": 5.5,
+            "timezone": timezone,
             "settings": {
         "observation_point": "topocentric", /*  topocentric / geocentric */
         "ayanamsha": "lahiri", /* lahiri / sayana */
