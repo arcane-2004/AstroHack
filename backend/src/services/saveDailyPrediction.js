@@ -1,4 +1,4 @@
-const DailyPrediction = require("../models/DailyPrediction");
+const DailyPrediction = require("../models/dailyPrediction");
 
 const saveDailyPrediction = async (userId, prediction) => {
     const date = new Date().toISOString().split("T")[0];
