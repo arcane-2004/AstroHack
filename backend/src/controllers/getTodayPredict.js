@@ -23,7 +23,7 @@
 //     getTodayPredict
 // };
 
-const AstrologyProfile = require("../models/AstroProfile");
+const AstrologyProfile = require("../models/astroProfile");
 const dailyPridictionModel = require("../models/dailyPrediction");
 const { createAstrologyPayload } = require("../utils/createAstrologyPayload");
 const { getNavamsaService } = require("../services/navamsaService");
